@@ -1,0 +1,9 @@
+# Local pipeline dependencies (NOT deployed to Vercel).
+# Used by src/chunking.py and src/embed_and_store.py to (re)build the
+# Chroma Cloud knowledge base.
+tiktoken
+langchain-text-splitters
+huggingface_hub
+chromadb
+numpy
+python-dotenv

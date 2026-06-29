@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cognizant Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1: #faf3e0; --bg2: #f3e6c9; --card: #fffaf0; --userbubble: #eadbb8;
+    --ink: #3b2f1e; --muted: #8a795c; --accent: #1f5fae; --accent-dark: #16467f;
+    --border: #e6d6b3; --shadow: rgba(80,60,20,.12);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: "Poppins", system-ui, sans-serif;
+    font-size: 19px;
+    color: var(--ink);
+    background: linear-gradient(155deg, var(--bg1), var(--bg2));
+  }
+  .app {
+    display: grid; grid-template-rows: auto 1fr auto;
+    height: 100vh; max-width: 880px; margin: 0 auto; padding: 0 16px;
+  }
+  header { text-align: center; padding: 26px 10px 14px; }
+  header h1 {
+    font-family: "Fraunces", Georgia, serif; font-weight: 600;
+    font-size: 38px; margin: 0; color: var(--accent-dark); letter-spacing: .3px;
+  }
+  header p { margin: 6px 0 0; color: var(--muted); font-size: 17px; }
+
+  .chat {
+    overflow-y: auto; padding: 12px 4px 8px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .msg {
+    max-width: 84%; padding: 16px 20px; border-radius: 20px; line-height: 1.6;
+    white-space: pre-wrap; font-size: 19px; box-shadow: 0 3px 12px var(--shadow);
+  }
+  .msg.bot { align-self: flex-start; background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 6px; }
+  .msg.user { align-self: flex-end; background: var(--userbubble); border-bottom-right-radius: 6px; }
+  .msg.typing { color: var(--muted); font-style: italic; }
+  .msg p { margin: 0 0 8px; }
+  .msg p:last-child { margin-bottom: 0; }
+  .msg ul { margin: 6px 0; padding-left: 22px; }
+  .msg li { margin: 4px 0; }
+  .msg strong { color: var(--accent-dark); }
+  .live-tag { display:inline-block; margin-top:10px; font-size:13px; color:var(--accent);
+    background: #eaf1fb; border:1px solid #cfe0f7; padding:3px 10px; border-radius:999px; }
+
+  .examples { display: flex; flex-wrap: wrap; gap: 10px; padding: 6px 4px 14px; justify-content: center; }
+  .chip {
+    background: var(--card); border: 1px solid var(--border); color: var(--ink);
+    padding: 9px 16px; border-radius: 999px; font-size: 15px; cursor: pointer;
+    box-shadow: 0 2px 6px var(--shadow); transition: .15s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent-dark); transform: translateY(-1px); }
+
+  footer { padding: 8px 4px 22px; }
+  .inputrow {
+    display: flex; gap: 12px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 8px 8px 8px 18px; box-shadow: 0 4px 16px var(--shadow);
+  }
+  textarea {
+    flex: 1; resize: none; height: 30px; max-height: 130px; border: none; outline: none;
+    background: transparent; color: var(--ink); font-size: 19px; font-family: inherit; padding-top: 4px;
+  }
+  textarea::placeholder { color: #b6a484; }
+  button.send {
+    background: var(--accent); color: #fff; border: none; border-radius: 14px;
+    padding: 0 26px; font-size: 18px; font-family: inherit; cursor: pointer; transition: .15s;
+  }
+  button.send:hover { background: var(--accent-dark); }
+  button.send:disabled { opacity: .5; cursor: default; }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-thumb { background: #e0cfa6; border-radius: 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Cognizant Assistant</h1>
+    <p>Ask me anything about Cognizant.</p>
+  </header>
+
+  <div class="chat" id="chat">
+    <div class="msg bot">Hi! Ask me about Cognizant.</div>
+  </div>
+
+  <div>
+    <div class="examples" id="examples"></div>
+    <footer>
+      <div class="inputrow">
+        <textarea id="q" rows="1" placeholder="Type your question..."
+          oninput="autoGrow(this)"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}"></textarea>
+        <button class="send" id="sendBtn" onclick="send()">Send</button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const EXAMPLES = [
+  "What does Cognizant do?",
+  "Who is the CEO of Cognizant?",
+  "What is the current CTSH stock price?",
+  "What is Neuro Cognizant?"
+];
+const exWrap = document.getElementById('examples');
+EXAMPLES.forEach(e => {
+  const c = document.createElement('div');
+  c.className = 'chip'; c.innerText = e;
+  c.onclick = () => { document.getElementById('q').value = e; send(); };
+  exWrap.appendChild(c);
+});
+
+function autoGrow(el){ el.style.height='30px'; el.style.height=Math.min(el.scrollHeight,130)+'px'; }
+
+function escapeHtml(t){ const d=document.createElement('div'); d.innerText=(t==null?'':t); return d.innerHTML; }
+
+function inline(t){
+  t = escapeHtml(t);
+  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/(^|[^\*])\*(?!\s)(.+?)\*(?!\*)/g, '$1<em>$2</em>');
+  return t;
+}
+
+function renderMarkdown(md){
+  const lines = (md || '').split('\n');
+  let html = '', inList = false;
+  for (const raw of lines){
+    const line = raw.replace(/\s+$/,'');
+    const t = line.trim();
+    const bullet = /^[\*\-]\s+(.*)/.exec(t);
+    const numbered = /^\d+\.\s+(.*)/.exec(t);
+    if (bullet || numbered){
+      if (!inList){ html += '<ul>'; inList = true; }
+      html += '<li>' + inline(bullet ? bullet[1] : numbered[1]) + '</li>';
+    } else {
+      if (inList){ html += '</ul>'; inList = false; }
+      if (t !== '') html += '<p>' + inline(line) + '</p>';
+    }
+  }
+  if (inList) html += '</ul>';
+  return html;
+}
+
+function addMsg(text, cls) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls; d.innerText = text;
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+
+function addBotMarkdown(md) {
+  const d = document.createElement('div');
+  d.className = 'msg bot'; d.innerHTML = renderMarkdown(md);
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+
+async function send() {
+  const q = document.getElementById('q');
+  const msg = q.value.trim();
+  if (!msg) return;
+  q.value = ''; autoGrow(q);
+  addMsg(msg, 'user');
+  const btn = document.getElementById('sendBtn'); btn.disabled = true;
+  const thinking = addMsg('Thinking…', 'bot typing');
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ message: msg })
+    });
+    const data = await res.json();
+    thinking.remove();
+    if (data.error) { addMsg('Sorry, something went wrong. Please try again.', 'bot'); }
+    else {
+      const bot = addBotMarkdown(data.answer);
+      if (data.used_live_web) {
+        const tag = document.createElement('div');
+        tag.className = 'live-tag'; tag.innerText = '🌐 Live result';
+        bot.appendChild(tag);
+      }
+      chat.scrollTop = chat.scrollHeight;
+    }
+  } catch (e) {
+    thinking.remove();
+    addMsg('Sorry, the request failed. Please try again.', 'bot');
+  } finally { btn.disabled = false; }
+}
+</script>
+</body>
+</html>

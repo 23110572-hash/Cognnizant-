@@ -1,0 +1,68 @@
+{
+  "total_chunks": 1791,
+  "structural": {
+    "chunks_missing_required_fields": 0,
+    "empty_text_chunks": 0,
+    "duplicate_chunk_ids": 0,
+    "not_self_describing": 0,
+    "pdf_chunks_bad_page_meta": 0
+  },
+  "size": {
+    "min": 20,
+    "max": 564,
+    "mean": 368.5,
+    "median": 445,
+    "p90": 505,
+    "oversized_count": 1,
+    "tiny_count": 0
+  },
+  "duplication": {
+    "exact_duplicate_text_groups": 0,
+    "examples": []
+  },
+  "coverage": {
+    "web_documents": 30,
+    "pdf_documents": 7,
+    "by_category": {
+      "company-overview": 19,
+      "leadership": 10,
+      "locations": 13,
+      "industry": 45,
+      "partnerships": 5,
+      "news": 14,
+      "responsible-ai": 7,
+      "services": 44,
+      "financials-strategy": 14,
+      "talent-hr": 8,
+      "thought-leadership": 7,
+      "clients": 4,
+      "financial-filing": 828,
+      "sustainability": 109,
+      "governance": 664
+    },
+    "web_files_with_no_chunks": [],
+    "pdf_files_with_no_chunks": []
+  },
+  "coherence": {
+    "hard_midsentence_cuts": 172,
+    "hard_midsentence_cut_pct": 9.6,
+    "no_terminal_punctuation_pct": 76.3,
+    "mean_consecutive_similarity": 0.231,
+    "median_consecutive_similarity": 0.201,
+    "mean_max_sibling_similarity": 0.327,
+    "potential_orphan_chunks": 3,
+    "orphan_examples": [
+      "about-cognizant__002__3e6757c341",
+      "culture-and-values__004__16e7e67ff2",
+      "top-clients-and-case-studies__002__226d9dcf06"
+    ]
+  },
+  "verdict": {
+    "hard_failures": [],
+    "warnings": [
+      "1 chunks exceed 560 tokens",
+      "3 chunks barely relate to their own document"
+    ],
+    "passed": true
+  }
+}

@@ -1,0 +1,9 @@
+# Exclude everything not needed by the deployed app to keep the build small.
+data/
+chunks/
+src/
+requirements-dev.txt
+.env
+__pycache__/
+**/__pycache__/
+*.pyc

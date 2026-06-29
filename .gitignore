@@ -1,0 +1,13 @@
+# Secrets — never commit
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Embedding cache (large)
+chunks/embeddings_cache.jsonl
+
+

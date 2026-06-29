@@ -1,0 +1,233 @@
+{
+  "about-cognizant": {
+    "source_type": "web",
+    "category": "company-overview",
+    "doc_title": "About Cognizant",
+    "chunk_count": 5,
+    "total_tokens": 483
+  },
+  "board-of-directors": {
+    "source_type": "web",
+    "category": "leadership",
+    "doc_title": "Cognizant — Board of Directors",
+    "chunk_count": 1,
+    "total_tokens": 388
+  },
+  "cognizant-agentic-ai": {
+    "source_type": "web",
+    "category": "ai-platforms",
+    "doc_title": "Cognizant — Agentic AI",
+    "chunk_count": 7,
+    "total_tokens": 558
+  },
+  "cognizant-company-profile-and-recognition": {
+    "source_type": "web",
+    "category": "company-overview",
+    "doc_title": "Cognizant — Company Profile, Recognition, and Acquisitions",
+    "chunk_count": 6,
+    "total_tokens": 1058
+  },
+  "cognizant-neuro-ai-platform": {
+    "source_type": "web",
+    "category": "ai-platforms",
+    "doc_title": "Cognizant Neuro — AI Platform Suite",
+    "chunk_count": 8,
+    "total_tokens": 724
+  },
+  "company-history-and-overview": {
+    "source_type": "web",
+    "category": "company-overview",
+    "doc_title": "Cognizant — Company History and Overview",
+    "chunk_count": 9,
+    "total_tokens": 1390
+  },
+  "culture-and-values": {
+    "source_type": "web",
+    "category": "company-overview",
+    "doc_title": "Culture and Values",
+    "chunk_count": 5,
+    "total_tokens": 312
+  },
+  "executive-bios-and-leadership-thinking": {
+    "source_type": "web",
+    "category": "leadership",
+    "doc_title": "Cognizant — Executive Bios and Leadership Thinking",
+    "chunk_count": 8,
+    "total_tokens": 1398
+  },
+  "global-presence-by-region": {
+    "source_type": "web",
+    "category": "locations",
+    "doc_title": "Cognizant — Global Presence by Region and Country",
+    "chunk_count": 6,
+    "total_tokens": 465
+  },
+  "industry-banking": {
+    "source_type": "web",
+    "category": "industry",
+    "doc_title": "Banking (Industry Solutions)",
+    "chunk_count": 6,
+    "total_tokens": 384
+  },
+  "industry-healthcare": {
+    "source_type": "web",
+    "category": "industry",
+    "doc_title": "Healthcare (Industry Solutions)",
+    "chunk_count": 7,
+    "total_tokens": 459
+  },
+  "industry-insurance": {
+    "source_type": "web",
+    "category": "industry",
+    "doc_title": "Insurance (Industry Solutions)",
+    "chunk_count": 6,
+    "total_tokens": 435
+  },
+  "industry-life-sciences": {
+    "source_type": "web",
+    "category": "industry",
+    "doc_title": "Life Sciences (Industry Solutions)",
+    "chunk_count": 10,
+    "total_tokens": 664
+  },
+  "industry-manufacturing": {
+    "source_type": "web",
+    "category": "industry",
+    "doc_title": "Manufacturing (Industry Solutions)",
+    "chunk_count": 7,
+    "total_tokens": 346
+  },
+  "industry-retail": {
+    "source_type": "web",
+    "category": "industry",
+    "doc_title": "Retail (Industry Solutions)",
+    "chunk_count": 9,
+    "total_tokens": 543
+  },
+  "leadership-team": {
+    "source_type": "web",
+    "category": "leadership",
+    "doc_title": "Cognizant Leadership Team",
+    "chunk_count": 1,
+    "total_tokens": 283
+  },
+  "locations-and-operations": {
+    "source_type": "web",
+    "category": "locations",
+    "doc_title": "Cognizant — Locations and Operations",
+    "chunk_count": 7,
+    "total_tokens": 571
+  },
+  "partnerships": {
+    "source_type": "web",
+    "category": "partnerships",
+    "doc_title": "Cognizant — Partnerships and Alliances",
+    "chunk_count": 6,
+    "total_tokens": 894
+  },
+  "press-q4-fy2025-results": {
+    "source_type": "web",
+    "category": "news",
+    "doc_title": "Cognizant Reports Fourth Quarter and Full-Year 2025 Results",
+    "chunk_count": 10,
+    "total_tokens": 1874
+  },
+  "recent-news-2026": {
+    "source_type": "web",
+    "category": "news",
+    "doc_title": "Cognizant — Recent News and Announcements (2026)",
+    "chunk_count": 4,
+    "total_tokens": 632
+  },
+  "responsible-ai": {
+    "source_type": "web",
+    "category": "responsible-ai",
+    "doc_title": "Responsible AI",
+    "chunk_count": 7,
+    "total_tokens": 502
+  },
+  "services-application-services-modernization": {
+    "source_type": "web",
+    "category": "services",
+    "doc_title": "Application Services & Modernization",
+    "chunk_count": 8,
+    "total_tokens": 526
+  },
+  "services-business-process-services": {
+    "source_type": "web",
+    "category": "services",
+    "doc_title": "Business Process Services (BPS)",
+    "chunk_count": 7,
+    "total_tokens": 538
+  },
+  "services-cloud-solutions": {
+    "source_type": "web",
+    "category": "services",
+    "doc_title": "Cloud Solutions",
+    "chunk_count": 5,
+    "total_tokens": 310
+  },
+  "services-consulting": {
+    "source_type": "web",
+    "category": "services",
+    "doc_title": "Consulting",
+    "chunk_count": 4,
+    "total_tokens": 241
+  },
+  "services-cybersecurity": {
+    "source_type": "web",
+    "category": "services",
+    "doc_title": "Cybersecurity Services",
+    "chunk_count": 7,
+    "total_tokens": 441
+  },
+  "services-data-and-ai": {
+    "source_type": "web",
+    "category": "services",
+    "doc_title": "Data and AI Services",
+    "chunk_count": 8,
+    "total_tokens": 530
+  },
+  "services-intelligent-process-automation": {
+    "source_type": "web",
+    "category": "services",
+    "doc_title": "Intelligent Process Automation (IPA)",
+    "chunk_count": 5,
+    "total_tokens": 372
+  },
+  "stock-ownership-and-share-info": {
+    "source_type": "web",
+    "category": "financials-strategy",
+    "doc_title": "Cognizant — Stock, Share Price and Ownership",
+    "chunk_count": 7,
+    "total_tokens": 851
+  },
+  "strategy-and-future-goals": {
+    "source_type": "web",
+    "category": "financials-strategy",
+    "doc_title": "Cognizant — Strategy, Business Plan and Future Goals",
+    "chunk_count": 7,
+    "total_tokens": 1035
+  },
+  "talent-hr-and-careers": {
+    "source_type": "web",
+    "category": "talent-hr",
+    "doc_title": "Cognizant — Talent, HR Policies and Careers",
+    "chunk_count": 8,
+    "total_tokens": 734
+  },
+  "thought-leadership-ai-future-of-work": {
+    "source_type": "web",
+    "category": "thought-leadership",
+    "doc_title": "Cognizant — Thought Leadership: AI and the Future of Work",
+    "chunk_count": 7,
+    "total_tokens": 1322
+  },
+  "top-clients-and-case-studies": {
+    "source_type": "web",
+    "category": "clients",
+    "doc_title": "Cognizant — Top Clients and Notable Engagements",
+    "chunk_count": 4,
+    "total_tokens": 820
+  }
+}

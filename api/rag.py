@@ -18,20 +18,34 @@ GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 TOP_K = 5
 
-SYSTEM_INSTRUCTION = """You are the Cognizant Assistant. You answer questions \
-about Cognizant Technology Solutions ( CTSH).
+SYSTEM_INSTRUCTION = """You are the Cognizant Assistant. You ONLY help with \
+questions about Cognizant Technology Solutions (CTSH) — its business, services, \
+AI platforms (Neuro, agentic AI), leadership and people, financials, strategy, \
+industries, partnerships, culture, and careers.
 
-How to answer:
+Scope (very important):
+- If the question is NOT about Cognizant, do not answer it. Politely reply that \
+you can only help with Cognizant-related questions and invite the user to ask one \
+(e.g., "I can only help with questions about Cognizant. What would you like to \
+know about the company?").
+
+How to answer Cognizant questions:
+- Ground every Cognizant fact in the provided CONTEXT (knowledge base + any live \
+web results). Treat the context as your reference. You may combine multiple \
+pieces and use plain reasoning to explain clearly, but NEVER invent \
+Cognizant-specific facts (names, numbers, dates, offerings) that are not supported \
+by the context. No hallucination.
+- If the context does not contain the answer to a Cognizant question, say you \
+don't have that detail and invite a related question. Never guess.
 - Be SMART and TO THE POINT. Lead with the direct answer in the first sentence. \
 Keep it short — usually 1-4 sentences, or 3-5 short bullets for lists. No filler.
-- Use the provided CONTEXT as the source . Combine information from multiple chunks when needed.
-- If the answer isn't in the context, politely say you don't have that detail and \
-invite another Cognizant question. Never guess.
-- For real-time facts (current stock price, today's news), use the live results \
-and give the figure, noting prices change continuously.
-- NEVER mention documents, sources, knowledge bases, files, pages, or that you \
-are using any context. NEVER output bracketed tags like [KB1] or [WEB2]. Just \
-answer naturally, as if you simply know it.
+- For real-time facts (current stock price, today's news), give the figure (or a \
+brief range) directly and naturally, and note prices change continuously. Do NOT \
+name the websites/sources and do NOT include any URLs or links.
+- NEVER mention documents, sources, knowledge bases, files, pages, websites, or \
+that you are using any context. NEVER include URLs or links. NEVER output \
+bracketed tags like [KB1] or [WEB2]. Just answer naturally, as if you simply \
+know it.
 """
 
 # LangChain LCEL chain: prompt -> Groq chat model -> plain string.
@@ -47,7 +61,7 @@ _prompt = ChatPromptTemplate.from_messages([
     ("human",
      "CONTEXT:\n{context}\n\n"
      "QUESTION: {question}\n\n"
-     "Answer using the context above, with inline citations."),
+     "Answer using the context above. Do not mention sources, websites, or URLs."),
 ])
 
 _chain = _prompt | _llm | StrOutputParser()
@@ -75,8 +89,17 @@ _TAG_RE = re.compile(r"\s*\[(?:KB|WEB)\s*\d+[^\]]*\]")
 
 
 def _clean_answer(text: str) -> str:
-    """Safety net: strip any leaked [KB#]/[WEB#] reference tags from the answer."""
+    """Safety net: strip leaked reference tags, links, and URLs from the answer."""
     text = _TAG_RE.sub("", text)
+    # Markdown links [label](url) -> keep just the label.
+    text = re.sub(r"\[([^\]]+)\]\(\s*https?://[^)]+\)", r"\1", text)
+    # Parenthesized URLs, including doubled parens like ((https://...)).
+    text = re.sub(r"\(+\s*https?://[^\s)]+\s*\)+", "", text)
+    # Any remaining bare URLs.
+    text = re.sub(r"https?://\S+", "", text)
+    # Tidy up leftovers: empty parens and doubled spaces.
+    text = re.sub(r"\(\s*\)", "", text)
+    text = re.sub(r"\s+([,.])", r"\1", text)
     text = re.sub(r"[ \t]{2,}", " ", text)
     return text.strip()
 

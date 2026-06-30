@@ -1,13 +1,3 @@
-"""
-Cognizant RAG — retrieval test / reusable search.
-
-Embeds a query with the same model and runs a similarity search against the
-Chroma Cloud collection. Use it to sanity-check retrieval quality.
-
-Usage:
-  python src/search.py "Who is the CEO of Cognizant?"
-  python src/search.py            # runs a built-in set of sample queries
-"""
 
 from __future__ import annotations
 

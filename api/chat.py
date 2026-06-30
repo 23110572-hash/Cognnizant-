@@ -1,15 +1,24 @@
 """
-Vercel serverless function: POST /api/chat
+Vercel serverless function: /api/chat
 
-Receives a JSON body { "message": "...", "k": 5, "force_live": false } and
-returns the grounded RAG answer produced by rag.answer(). Implemented with the
-stdlib BaseHTTPRequestHandler (no Flask) to keep the serverless bundle small.
+POST { "message": "...", "k": 5, "force_live": false } -> grounded RAG answer.
+GET  -> lightweight diagnostic (env var presence + import status), so cold-start
+        failures surface as readable JSON instead of an empty 500.
+
+Heavy imports are done lazily inside the handlers and wrapped in try/except, so a
+configuration problem returns a clear JSON error rather than crashing the whole
+function at module load.
 """
 
 from http.server import BaseHTTPRequestHandler
 import json
+import os
+import traceback
 
-import rag
+REQUIRED_ENV = [
+    "GEMINI_API_KEY", "HF_TOKEN", "CHROMA_API_KEY",
+    "CHROMA_TENANT", "CHROMA_DATABASE", "TAVILY_API_KEY",
+]
 
 
 class handler(BaseHTTPRequestHandler):
@@ -21,6 +30,23 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def do_GET(self) -> None:
+        """Diagnostic: report config + whether the RAG module imports."""
+        env_present = {k: bool(os.environ.get(k)) for k in REQUIRED_ENV}
+        import_ok, import_err = True, None
+        try:
+            import rag  # noqa: F401
+        except Exception as e:
+            import_ok = False
+            import_err = f"{type(e).__name__}: {e}"
+        self._send(200, {
+            "status": "diagnostic",
+            "env_present": env_present,
+            "missing_env": [k for k, v in env_present.items() if not v],
+            "rag_import_ok": import_ok,
+            "rag_import_error": import_err,
+        })
+
     def do_POST(self) -> None:
         try:
             length = int(self.headers.get("content-length", 0) or 0)
@@ -29,9 +55,20 @@ class handler(BaseHTTPRequestHandler):
             message = (data.get("message") or "").strip()
             if not message:
                 return self._send(400, {"error": "empty message"})
+
+            missing = [k for k in REQUIRED_ENV if not os.environ.get(k)]
+            if missing:
+                return self._send(500, {
+                    "error": "Missing environment variables: " + ", ".join(missing)
+                })
+
+            import rag  # lazy import so import errors are catchable
             k = int(data.get("k", 5))
             force_live = bool(data.get("force_live", False))
             result = rag.answer(message, k=k, force_live=force_live)
             self._send(200, result)
-        except Exception as e:  # never leak a stack trace to the client
-            self._send(500, {"error": f"{type(e).__name__}: {e}"})
+        except Exception as e:
+            self._send(500, {
+                "error": f"{type(e).__name__}: {e}",
+                "trace": traceback.format_exc()[-1500:],
+            })

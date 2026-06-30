@@ -1,6 +1,6 @@
 # Runtime dependencies for the Vercel serverless function (api/chat.py).
 # Keep this lean — Vercel serverless functions have a bundle size limit.
-langchain-google-genai
+langchain-groq
 langchain-core
 chromadb-client
 huggingface_hub

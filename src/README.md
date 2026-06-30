@@ -81,25 +81,21 @@ facts (e.g., current stock price).
 python src/web_search.py "current CTSH stock price"
 ```
 
-# Stage 5: RAG chatbot (Gemini)
-`src/rag.py` — ties everything together.
-- Always retrieves top-k from Chroma (static facts).
+# Stage 5: RAG chatbot (Groq)
+`api/rag.py` — ties everything together.
+- Retrieves top-k from Chroma via a fast batched multi-query pass (static facts).
 - Adds Tavily live results when the query is time-sensitive.
-- Generates a grounded, cited answer with Gemini (`gemini-2.5-flash`),
+- Generates a grounded, cited answer with Groq (`llama-3.3-70b-versatile`),
   using a system prompt that forbids ungrounded claims and requires citations
   ([doc - section] for KB, URL for web).
 ```bash
-python src/check_gemini.py                 # list models available to the key
-python src/rag.py "Who is Cognizant's CEO?"   # one-shot
-python src/rag.py                              # interactive chat
+python api/rag.py "Who is Cognizant's CEO?"   # one-shot
+python api/rag.py                              # interactive chat
 ```
-
-Model note: `gemini-2.5-flash` works on the provided key; `gemini-2.0-flash`
-returned 429 (separate quota bucket); `gemini-1.5-flash` is 404 (unavailable).
 
 ## Full pipeline summary
 1. data collection -> data/web + data/pdfs
 2. chunking + QA   -> chunks/ (1,791 chunks)
 3. embed + store   -> Chroma Cloud `cognizant_kb` (384-d, 1,791 vectors)
 4. live web        -> Tavily
-5. RAG answer      -> Gemini, grounded + cited, KB for static / web for real-time
+5. RAG answer      -> Groq, grounded + cited, KB for static / web for real-time

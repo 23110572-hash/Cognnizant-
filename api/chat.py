@@ -1,14 +1,3 @@
-"""
-Vercel serverless function: /api/chat
-
-POST { "message": "...", "k": 5, "force_live": false } -> grounded RAG answer.
-GET  -> lightweight diagnostic (env var presence + import status), so cold-start
-        failures surface as readable JSON instead of an empty 500.
-
-Heavy imports are done lazily inside the handlers and wrapped in try/except, so a
-configuration problem returns a clear JSON error rather than crashing the whole
-function at module load.
-"""
 
 from http.server import BaseHTTPRequestHandler
 import json
@@ -22,7 +11,7 @@ import traceback
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 REQUIRED_ENV = [
-    "GEMINI_API_KEY", "HF_TOKEN", "CHROMA_API_KEY",
+    "GROQ_API_KEY", "HF_TOKEN", "CHROMA_API_KEY",
     "CHROMA_TENANT", "CHROMA_DATABASE", "TAVILY_API_KEY",
 ]
 

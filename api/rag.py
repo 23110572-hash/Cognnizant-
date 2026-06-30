@@ -5,7 +5,7 @@ import re
 import sys
 from dotenv import load_dotenv
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
@@ -14,7 +14,7 @@ import web_search
 
 load_dotenv()
 
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 TOP_K = 5
 
@@ -34,11 +34,11 @@ are using any context. NEVER output bracketed tags like [KB1] or [WEB2]. Just \
 answer naturally, as if you simply know it.
 """
 
-# LangChain LCEL chain: prompt -> Gemini chat model -> plain string.
+# LangChain LCEL chain: prompt -> Groq chat model -> plain string.
 # Built once at import time and reused for every question.
-_llm = ChatGoogleGenerativeAI(
-    model=GEMINI_MODEL,
-    google_api_key=os.environ["GEMINI_API_KEY"],
+_llm = ChatGroq(
+    model=GROQ_MODEL,
+    api_key=os.environ["GROQ_API_KEY"],
     temperature=0.2,
 )
 
@@ -52,17 +52,16 @@ _prompt = ChatPromptTemplate.from_messages([
 
 _chain = _prompt | _llm | StrOutputParser()
 
-# --- Multi-query expansion ---------------------------------------------------
-# Broad / overview questions ("what are the main services?") embed poorly against
-# a KB of narrow, single-topic pages. We expand the question into a few diverse
-# search queries, retrieve for each, then fuse — which surfaces the dedicated
-# pages a single generic query misses. Narrow questions are unaffected because
-# fusion keeps each chunk's best (lowest) distance.
+# --- Query expansion (for retrieval recall on broad questions) ---------------
+# Broad/overview questions ("what are the main services?") embed poorly against a
+# KB of narrow, single-topic pages, so we expand into a few diverse search
+# queries. Retrieval for all variants is then done in ONE parallel/batched pass
+# (see search.search_many) to keep this fast.
 _expand_prompt = ChatPromptTemplate.from_messages([
     ("system",
      "You rewrite a user's question into diverse search queries that maximize "
      "retrieval recall over a Cognizant knowledge base (services, industries, "
-     "financials, leadership, strategy). Output 4 short, varied search queries, "
+     "financials, leadership, strategy). Output 3 short, varied search queries, "
      "one per line, no numbering, no extra text. Cover different facets of the "
      "question (e.g. for 'main services' include cloud, data and AI, consulting, "
      "cybersecurity, application services, business process services)."),
@@ -71,6 +70,7 @@ _expand_prompt = ChatPromptTemplate.from_messages([
 _expand_chain = _expand_prompt | _llm | StrOutputParser()
 
 
+# --- Reference-tag cleanup ---------------------------------------------------
 _TAG_RE = re.compile(r"\s*\[(?:KB|WEB)\s*\d+[^\]]*\]")
 
 
@@ -82,7 +82,7 @@ def _clean_answer(text: str) -> str:
 
 
 def _expand_queries(question: str) -> list[str]:
-    """Return the original question plus a few LLM-generated variations."""
+    """Return the original question plus a few LLM-generated variations (best-effort)."""
     queries = [question]
     try:
         raw = _expand_chain.invoke({"question": question})
@@ -92,23 +92,25 @@ def _expand_queries(question: str) -> list[str]:
                 queries.append(q)
     except Exception:
         pass  # expansion is best-effort; fall back to the raw question
-    return queries[:5]
+    return queries[:4]
 
 
 def _retrieve_kb(question: str, k: int) -> list[dict]:
-    """Multi-query KB retrieval: expand, retrieve per query, fuse by best distance.
+    """Multi-query retrieval done in a single fast pass.
 
-    A diversity pass then prefers one chunk per distinct document before filling
-    remaining slots, so breadth questions surface several pages instead of
-    multiple near-duplicate chunks from the same one.
+    Expand the question, then embed all variants in parallel and run ONE batched
+    Chroma query (search.search_many). Fuse by best distance and apply a
+    per-document diversity pass so breadth questions surface several pages.
     """
+    queries = _expand_queries(question)
+    hits = search.search_many(queries, k=k)
+
     best: dict[tuple, dict] = {}
-    for q in _expand_queries(question):
-        for h in search.search(q, k=k):
-            m = h["meta"]
-            key = (m.get("doc_id"), m.get("chunk_index"))
-            if key not in best or h["distance"] < best[key]["distance"]:
-                best[key] = h
+    for h in hits:
+        m = h["meta"]
+        key = (m.get("doc_id"), m.get("chunk_index"))
+        if key not in best or h["distance"] < best[key]["distance"]:
+            best[key] = h
     ranked = sorted(best.values(), key=lambda h: h["distance"])
 
     # Diversity: take the best chunk from each distinct doc first, then backfill.
@@ -130,7 +132,7 @@ def build_context(question: str, k: int = TOP_K, force_live: bool = False):
     sources: list[dict] = []
     blocks: list[str] = []
 
-    # 1) Knowledge base (multi-query expansion for better recall)
+    # 1) Knowledge base (fast batched multi-query retrieval + diversity pass)
     kb_hits = _retrieve_kb(question, k=k)
     if kb_hits:
         kb_lines = ["### KNOWLEDGE BASE EXCERPTS"]

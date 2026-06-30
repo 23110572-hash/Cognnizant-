@@ -40,7 +40,7 @@ def search_web(query: str, max_results: int = 5, scope_cognizant: bool = True) -
     resp = _client.search(
         query=q,
         max_results=max_results,
-        search_depth="advanced",
+        search_depth="basic",
         include_answer=True,
     )
     results = [

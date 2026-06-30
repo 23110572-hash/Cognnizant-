@@ -46,6 +46,13 @@ name the websites/sources and do NOT include any URLs or links.
 that you are using any context. NEVER include URLs or links. NEVER output \
 bracketed tags like [KB1] or [WEB2]. Just answer naturally, as if you simply \
 know it.
+- NEVER use phrases that reveal how you answer, such as "the provided context", \
+"the context", "based on the information provided", "as mentioned", "as stated", \
+"from the information given", or "I was provided". The user must never know there \
+is any underlying context. Speak as if the knowledge is simply yours.
+- When you don't have a detail or the question is off-topic, keep the reply brief \
+and always steer back to Cognizant (invite a Cognizant question) — without \
+referencing any context.
 """
 
 # LangChain LCEL chain: prompt -> Groq chat model -> plain string.
@@ -89,7 +96,8 @@ _TAG_RE = re.compile(r"\s*\[(?:KB|WEB)\s*\d+[^\]]*\]")
 
 
 def _clean_answer(text: str) -> str:
-    """Safety net: strip leaked reference tags, links, and URLs from the answer."""
+    """Safety net: strip leaked reference tags, links, URLs, and any phrasing that
+    reveals the answer is built from an underlying context."""
     text = _TAG_RE.sub("", text)
     # Markdown links [label](url) -> keep just the label.
     text = re.sub(r"\[([^\]]+)\]\(\s*https?://[^)]+\)", r"\1", text)
@@ -97,10 +105,30 @@ def _clean_answer(text: str) -> str:
     text = re.sub(r"\(+\s*https?://[^\s)]+\s*\)+", "", text)
     # Any remaining bare URLs.
     text = re.sub(r"https?://\S+", "", text)
-    # Tidy up leftovers: empty parens and doubled spaces.
+
+    # Remove "context"-leaking lead-ins and inline mentions.
+    text = re.sub(
+        r"(?i)\b(based on|according to|as per|per|from|within|in)\s+"
+        r"(the\s+)?(provided\s+|given\s+|available\s+|supplied\s+)?"
+        r"(context|information provided|provided information|information given)\b[,:]?\s*",
+        "", text,
+    )
+    text = re.sub(
+        r"(?i),?\s*as\s+(mentioned|stated|noted|described|shown|listed)"
+        r"(\s+(in|above|previously|earlier|here)[^,.]*)?",
+        "", text,
+    )
+    text = re.sub(r"(?i)\bthe\s+(provided|given|available)\s+context\b", "the information", text)
+    text = re.sub(r"(?i)\b(provided|given)\s+context\b", "available information", text)
+    text = re.sub(r"(?i)\bthe\s+context\b", "the information", text)
+    text = re.sub(r"(?i)\bin\s+the\s+context\b", "", text)
+
+    # Tidy leftovers: empty parens, stray leading punctuation, doubled spaces.
     text = re.sub(r"\(\s*\)", "", text)
-    text = re.sub(r"\s+([,.])", r"\1", text)
+    text = re.sub(r"\s+([,.;:])", r"\1", text)
     text = re.sub(r"[ \t]{2,}", " ", text)
+    # Re-capitalize sentence starts left lowercase by a removed lead-in.
+    text = re.sub(r"(^|[.!?]\s+)([a-z])", lambda m: m.group(1) + m.group(2).upper(), text)
     return text.strip()
 
 

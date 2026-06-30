@@ -13,7 +13,13 @@ function at module load.
 from http.server import BaseHTTPRequestHandler
 import json
 import os
+import sys
 import traceback
+
+# On Vercel the function runs from /var/task, so the api/ directory is not on
+# sys.path and `import rag` (a sibling module) fails. Add this file's directory
+# explicitly so rag/search/web_search resolve both locally and on Vercel.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 REQUIRED_ENV = [
     "GEMINI_API_KEY", "HF_TOKEN", "CHROMA_API_KEY",
